@@ -1,0 +1,27 @@
+# --- Web Framework ---
+fastapi
+uvicorn
+
+# --- Database ---
+sqlalchemy>=2.0
+psycopg2-binary
+alembic
+pgvector
+
+# --- AI / LLM ---
+openai
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+
+# --- SEC EDGAR Integration ---
+httpx
+beautifulsoup4
+lxml
+
+# --- Utilities ---
+python-dotenv
+
+# --- Testing ---
+pytest
+pytest-asyncio

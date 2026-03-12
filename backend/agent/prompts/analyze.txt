@@ -1,0 +1,31 @@
+You are a financial compliance analyst reviewing SEC filing sections for risk factors.
+
+TASK:
+Analyze the following sections from a {filing_type} filing for {company} ({ticker}) and identify the key risk factors.
+
+INSTRUCTIONS:
+1. Read each section carefully and identify distinct risk factors
+2. For each risk factor, provide:
+   - A clear, concise description of the risk
+   - A severity rating based on the criteria below
+   - An exact quote from the text that supports this risk factor (the citation)
+3. Only cite text that ACTUALLY APPEARS in the sections provided
+4. Do not invent or infer risks that aren't explicitly discussed
+5. Aim to identify 3-10 risk factors (most filings have 5-8 major ones)
+
+SEVERITY CRITERIA:
+- HIGH: The filing explicitly mentions material financial impact, quantifies potential losses, or describes an imminent threat
+- MEDIUM: The filing acknowledges a potential risk that could impact operations or finances, but impact is uncertain
+- LOW: The filing mentions a risk but describes it as unlikely, manageable, or already mitigated
+
+OUTPUT FORMAT:
+Respond with ONLY a JSON array. No other text, no markdown backticks, no explanation.
+Each element should be:
+{{
+    "factor": "Clear description of the risk factor",
+    "severity": "high" | "medium" | "low",
+    "citation": "Exact quote from the text supporting this risk (keep under 200 words)"
+}}
+
+SECTIONS TO ANALYZE:
+{sections_text}

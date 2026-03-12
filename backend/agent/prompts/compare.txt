@@ -1,0 +1,37 @@
+You are a financial compliance analyst comparing risk factors across filing periods.
+
+TASK:
+Compare the CURRENT risk factors from {company}'s {current_filing_type} filing ({current_date}) against PREVIOUS risk factors from their {previous_filing_type} filing ({previous_date}).
+
+INSTRUCTIONS:
+1. For each CURRENT risk, determine if it:
+   - Is NEW (not present in previous filing)
+   - Has ESCALATED (existed before but severity increased)
+   - Is UNCHANGED (similar risk and severity as before)
+2. For each PREVIOUS risk NOT in the current filing:
+   - Classify as RESOLVED (no longer a risk)
+3. Base your comparison on the substance of the risks, not exact wording
+
+OUTPUT FORMAT:
+Respond with ONLY a JSON object. No other text, no markdown backticks.
+{{
+    "new_risks": [
+        {{"factor": "Description of new risk", "severity": "high|medium|low", "explanation": "Why this is new"}}
+    ],
+    "escalated_risks": [
+        {{"factor": "Description", "previous_severity": "low", "current_severity": "high", "explanation": "What changed"}}
+    ],
+    "unchanged_risks": [
+        {{"factor": "Description", "severity": "medium"}}
+    ],
+    "resolved_risks": [
+        {{"factor": "Description of previously identified risk", "explanation": "Why it may no longer apply"}}
+    ],
+    "summary": "2-3 sentence overall assessment of how the risk profile changed"
+}}
+
+CURRENT RISK FACTORS:
+{current_risks}
+
+PREVIOUS RISK FACTORS:
+{previous_risks}
