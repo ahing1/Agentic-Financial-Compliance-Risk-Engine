@@ -40,7 +40,7 @@ def get_cik_from_ticker(ticker: str) -> str:
 
         data = response.json()
     
-    for entry in date.values():
+    for entry in data.values():
         if entry.get("ticker", "").upper() == ticker:
             cik = str(entry["cik_str"]).zfill(10)
             logger.info(f"Found CIK {cik} for ticker {ticker} ({entry.get('title', 'Unknown')})")
@@ -91,7 +91,7 @@ def get_recent_filings(cik: str, filing_type: str = "10-K", count: int = 5) -> l
             if form == filing_type and i < len(accession_numbers):
                 results.append({
                     "accession_number": accession_numbers[i],
-                    "filing_date": filing_date[i],
+                    "filing_date": filing_dates[i],
                     "primary_document": primary_documents[i] if i < len(primary_documents) else None
                 })
                 if len(results) >= count:

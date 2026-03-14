@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def ensure_tables():
     """Create tables if they don't exist."""
-    import app.models  # noqa: F401
+    import app.models
     Base.metadata.create_all(bind=engine)
 
 

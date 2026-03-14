@@ -5,7 +5,7 @@ from sqlalchemy import Column, Date, DateTime, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.dp.session import Base
+from app.db.session import Base
 
 class Filing(Base):
     __tablename__ = "filings"
@@ -18,14 +18,14 @@ class Filing(Base):
     )
 
     company = Column(String(255), nullable=False)
-    ticket = Column(String(10), nullable=False, index=True)
+    ticker = Column(String(10), nullable=False, index=True)
     filing_type = Column(String(10), nullable=False)
     filing_date = Column(Date, nullable=False)
     source_url = Column(Text, nullable=False)
     raw_text = Column(Text)
     status = Column(String(20), server_default=text("NOW()"), default=datetime.utcnow)
 
-    chuinks = relationship(
+    chunks = relationship(
         "FilingChunk", 
         back_populates="filing",
         cascade="all, delete-orphan",
@@ -47,4 +47,4 @@ class Filing(Base):
     )
 
     def __repr__(self):
-        return f"Filing(id={self.id}, ticker={self.ticket}, type={self.filing_type}, date={self.filing_date})"
+        return f"Filing(id={self.id}, ticker={self.ticker}, type={self.filing_type}, date={self.filing_date})"

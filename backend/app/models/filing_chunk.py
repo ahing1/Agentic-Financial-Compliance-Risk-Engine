@@ -23,7 +23,7 @@ class FilingChunk(Base):
 
     filing_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("filing.id", ondelete="CASCADE"),
+        ForeignKey("filings.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )

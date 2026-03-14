@@ -15,7 +15,7 @@ ALL succeed or ALL fail. This is called a "transaction."
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
-from sqlalchemy import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
 
