@@ -21,7 +21,7 @@ def parse_filing_html(html: str) -> dict[str, str]:
     logger.info(f"Parsing filing HTML ({len(html)} characters)")
     
     # --- Step 1: HTML → Plain Text ---
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     
     # Remove <script> and <style> tags — they contain code/CSS, not content
     for tag in soup.find_all(["script", "style"]):

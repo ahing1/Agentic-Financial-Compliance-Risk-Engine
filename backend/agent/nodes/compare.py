@@ -7,10 +7,10 @@ import json
 import logging
 from pathlib import Path
 
-from openai import OpenAI
 from sqlalchemy import select
 
 from agent.state import AgentState
+from agent.clients import get_openai_client
 from app.config import settings
 from app.db.session import get_session
 from app.models.filing import Filing
@@ -18,8 +18,6 @@ from app.models.report import AnalysisReport
 from app.models.risk_factor import RiskFactor
 
 logger = logging.getLogger(__name__)
-
-openai_client = OpenAI(api_key=settings.openai_api_key)
 
 PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "compare.txt"
 
@@ -151,7 +149,7 @@ def _compare_risks(state: AgentState, current_risks: list[dict], historical: dic
     )
     
     try:
-        response = openai_client.chat.completions.create(
+        response = get_openai_client().chat.completions.create(
             model=settings.llm_model,
             messages=[
                 {

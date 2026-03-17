@@ -109,6 +109,3 @@ def build_agent_graph() -> StateGraph:
     compiled = graph.compile()
     logger.info("Agent graph compiled successfully")
     return compiled
-
-
-agent_graph = build_agent_graph()

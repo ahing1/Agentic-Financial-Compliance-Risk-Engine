@@ -10,16 +10,13 @@ import json
 import logging
 from pathlib import Path
 
-from openai import OpenAI
-
 from agent.state import AgentState
+from agent.clients import get_openai_client
 from app.config import settings
 from app.db.session import get_session
 from app.models.filing_chunk import FilingChunk
 
 logger = logging.getLogger(__name__)
-
-openai_client = OpenAI(api_key=settings.openai_api_key)
 
 PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "analyze.txt"
 
@@ -55,7 +52,7 @@ def analyze_risk_factors(state: AgentState) -> dict:
     
     # --- Call the LLM ---
     try:
-        response = openai_client.chat.completions.create(
+        response = get_openai_client().chat.completions.create(
             model=settings.llm_model,
             messages=[
                 {

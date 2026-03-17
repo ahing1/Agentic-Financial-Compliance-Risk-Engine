@@ -9,9 +9,20 @@ from worker.pubsub import publish_update
 from app.db.session import get_session
 from app.models.filing import Filing
 from app.models.job import Job
-from agent.graph import agent_graph
 
 logger = logging.getLogger(__name__)
+
+# Lazy import: agent_graph triggers OpenAI client + SQLAlchemy engine creation.
+# These must NOT be initialized before Celery's billiard forks the worker process
+# on macOS, or the forked resources cause a crash ("Python quit unexpectedly").
+_agent_graph = None
+
+def _get_agent_graph():
+    global _agent_graph
+    if _agent_graph is None:
+        from agent.graph import build_agent_graph
+        _agent_graph = build_agent_graph()
+    return _agent_graph
 
 @celery_app.task(
     bind=True,
@@ -92,17 +103,28 @@ def analyze_filing(self: Task, job_id: str, filing_id: str) -> dict:
     
 
 def _run_agent_with_updates(job_id: str, initial_state: dict) -> dict:
-    # Run the agent and publish progress updates to Redis.
-    result = agent_graph.invoke(initial_state)
-    
-    # Publish all status messages that accumulated during execution
-    for msg in result.get("status_messages", []):
-        publish_update(job_id, msg)
-        
-        # Update the job's current_step in the database
-        _update_job_step(job_id, msg.get("step", "unknown"))
-    
-    return result
+    # Stream the agent node-by-node so we can publish updates in real time.
+    # agent_graph.stream() yields {node_name: node_output} after each node completes,
+    # unlike .invoke() which blocks until the entire graph finishes.
+    published_count = 0
+    final_state = dict(initial_state)
+
+    graph = _get_agent_graph()
+    for chunk in graph.stream(initial_state):
+        # Each chunk is {node_name: node_output_dict}
+        for node_name, node_output in chunk.items():
+            # Merge node output into our running state
+            final_state.update(node_output)
+
+            # Publish any NEW status messages this node added
+            all_messages = node_output.get("status_messages", [])
+            new_messages = all_messages[published_count:]
+            for msg in new_messages:
+                publish_update(job_id, msg)
+                _update_job_step(job_id, msg.get("step", "unknown"))
+            published_count = len(final_state.get("status_messages", []))
+
+    return final_state
 
 def _load_filing(filing_id: str, job_id: str) -> dict:
     """Load filing data from the database for the agent."""

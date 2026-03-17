@@ -18,16 +18,13 @@ On retry loops, chunks are already in pgvector — no need to re-embed.
 import logging
 from uuid import uuid4
 
-from openai import OpenAI
-
 from agent.state import AgentState
+from agent.clients import get_openai_client
 from app.config import settings
 from app.db.session import get_session
 from app.models.filing_chunk import FilingChunk
 
 logger = logging.getLogger(__name__)
-
-openai_client = OpenAI(api_key=settings.openai_api_key)
 
 
 def chunk_and_embed(state: AgentState) -> dict:
@@ -233,7 +230,7 @@ def _generate_embeddings(chunks: list[dict]) -> list[dict]:
         batch = texts[i:i + batch_size]
         logger.debug(f"Embedding batch {i // batch_size + 1} ({len(batch)} chunks)")
         
-        response = openai_client.embeddings.create(
+        response = get_openai_client().embeddings.create(
             model=settings.embedding_model,
             input=batch,
         )

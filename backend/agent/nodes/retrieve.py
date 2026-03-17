@@ -13,17 +13,15 @@ citations failed verification. The agent refines its search strategy.
 
 import logging
 
-from openai import OpenAI
 from sqlalchemy import select
 
 from agent.state import AgentState
+from agent.clients import get_openai_client
 from app.config import settings
 from app.db.session import get_session
 from app.models.filing_chunk import FilingChunk
 
 logger = logging.getLogger(__name__)
-
-openai_client = OpenAI(api_key=settings.openai_api_key)
 
 # Default search queries for the first pass
 DEFAULT_QUERIES = [
@@ -93,7 +91,7 @@ def _similarity_search(filing_id: str, query: str, top_k: int = 8) -> list[dict]
     We ORDER BY ascending (smallest distance = most similar).
     """
     # Embed the query
-    response = openai_client.embeddings.create(
+    response = get_openai_client().embeddings.create(
         model=settings.embedding_model,
         input=query,
     )

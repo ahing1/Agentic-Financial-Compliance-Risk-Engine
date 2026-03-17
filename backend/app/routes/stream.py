@@ -31,33 +31,17 @@ def stream_job_progress(job_id: str):
         job = session.query(Job).filter_by(id=job_id).first()
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
-        
-        # If the job is already complete, don't open an SSE connection.
-        # Return the final status as a single event and close.
-        if job.status in ("completed", "failed", "needs_review"):
-            return StreamingResponse(
-                _single_event(job.status, job.error),
-                media_type="text/event-stream",
-                headers={
-                    "Cache-Control": "no-cache",
-                    "Connection": "keep-alive",
-                    "X-Accel-Buffering": "no",  # Disable nginx buffering
-                },
-            )
-    
-    # Job is pending or processing, stream updates
+
+    # Always use the event generator — it reads from the Redis message list
+    # so it works whether the job is pending, in progress, or already done.
+    # The subscribe() function replays stored messages first, then listens
+    # for new ones, so there's no race condition.
     return StreamingResponse(
         _event_generator(job_id),
         media_type="text/event-stream",
         headers={
-            # Cache-Control: no-cache tells browsers and proxies not to cache
-            # SSE responses. Each event is unique and time-sensitive.
             "Cache-Control": "no-cache",
-            # Connection: keep-alive tells the browser to keep the connection open
             "Connection": "keep-alive",
-            # X-Accel-Buffering: no tells nginx (if present) not to buffer
-            # the response. Without this, nginx collects events and sends
-            # them in batches, defeating the purpose of real-time streaming.
             "X-Accel-Buffering": "no",
         },
     )
@@ -90,11 +74,3 @@ def _event_generator(job_id: str):
         yield error_event
 
 
-def _single_event(status: str, error: str | None):
-    """Generator that yields a single event for already-completed jobs."""
-    data = {
-        "step": "complete" if status == "completed" else "error",
-        "message": error or f"Job already {status}",
-        "progress": 100,
-    }
-    yield f"data: {json.dumps(data)}\n\n"

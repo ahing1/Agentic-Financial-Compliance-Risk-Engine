@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import filings, stream, health
-from app.db.session import engine, Base
+from app.db.session import get_engine, Base
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,7 +45,7 @@ def on_startup():
     command every time you restart the server.
     """
     import app.models
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=get_engine())
     logger.info("Database tables created/verified")
     logger.info("Compliance Engine API started")
 
