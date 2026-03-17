@@ -20,7 +20,6 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from app.config import settings
 
 
-# every database model inherits from this base class. ssqlalchemy uses base to keep track of all your models your models and their table definitions
 class Base(DeclarativeBase):
     pass
 

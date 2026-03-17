@@ -23,7 +23,8 @@ class Filing(Base):
     filing_date = Column(Date, nullable=False)
     source_url = Column(Text, nullable=False)
     raw_text = Column(Text)
-    status = Column(String(20), server_default=text("NOW()"), default=datetime.utcnow)
+    status = Column(String(20), server_default=text("'pending'"), default="pending")
+    created_at = Column(DateTime, server_default=text("NOW()"), default=datetime.utcnow)
 
     chunks = relationship(
         "FilingChunk", 

@@ -1,27 +1,31 @@
 # --- Web Framework ---
-fastapi
-uvicorn
+fastapi==0.135.1
+uvicorn==0.42.0
 
 # --- Database ---
-sqlalchemy>=2.0
-psycopg2-binary
-alembic
-pgvector
+sqlalchemy==2.0.48
+psycopg2-binary==2.9.11
+alembic==1.18.4
+pgvector==0.4.2
 
 # --- AI / LLM ---
-openai
-langgraph>=0.2.0
-langchain>=0.3.0
-langchain-openai>=0.2.0
+openai==2.28.0
+langgraph==1.1.2
+langchain==1.2.12
+langchain-openai==1.1.11
 
 # --- SEC EDGAR Integration ---
-httpx
-beautifulsoup4
-lxml
+httpx==0.28.1
+beautifulsoup4==4.14.3
+lxml==6.0.2
+
+# --- Task Queue / Background Workers ---
+celery==5.6.2
+redis==7.3.0
 
 # --- Utilities ---
-python-dotenv
+python-dotenv==1.2.2
 
 # --- Testing ---
-pytest
-pytest-asyncio
+pytest==8.3.5
+pytest-asyncio==1.1.0
