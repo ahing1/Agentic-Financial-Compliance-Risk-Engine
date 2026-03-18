@@ -62,8 +62,10 @@ def _check_database() -> str:
 def _check_redis() -> str:
     """Verify Redis is reachable with a PING command."""
     try:
+        import os
         import redis
-        r = redis.Redis(host="localhost", port=6379, db=0)
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        r = redis.Redis.from_url(redis_url)
         r.ping()  # Redis PING returns True if connected
         r.close()
         return "connected"

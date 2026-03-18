@@ -19,8 +19,8 @@ REDIS_URL = settings.database_url.replace(
     "postgresql", "redis"
 ).split("@")[0].rsplit("/", 1)[0] if "postgresql" in settings.database_url else "redis://localhost:6379/0"
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # create celery app
 celery_app = Celery(

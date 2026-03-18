@@ -45,7 +45,12 @@ def on_startup():
     command every time you restart the server.
     """
     import app.models
-    Base.metadata.create_all(bind=get_engine())
+    from sqlalchemy import text
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.commit()
+    Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")
     logger.info("Compliance Engine API started")
 

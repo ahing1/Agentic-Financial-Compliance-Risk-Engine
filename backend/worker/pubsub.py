@@ -1,22 +1,19 @@
 import json
+import os
 import logging
 from typing import Generator
 
-import redis
+import redis as redis_lib
 
 logger = logging.getLogger(__name__)
 
 _redis_client = None
 
-def _get_redis() -> redis.Redis:
+def _get_redis() -> redis_lib.Redis:
     global _redis_client
     if _redis_client is None:
-        _redis_client = redis.Redis(
-            host="localhost",
-            port=6379,
-            db=0,
-            decode_responses=True
-        )
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        _redis_client = redis_lib.Redis.from_url(redis_url, decode_responses=True)
     return _redis_client
 
 def _channel_name(job_id: str) -> str:
@@ -64,7 +61,8 @@ def subscribe(job_id: str) -> Generator[dict, None, None]:
     3. On each pub/sub ping, read new messages from the list
     4. Stop when a terminal message (complete/error) is received
     """
-    r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    r = redis_lib.Redis.from_url(redis_url, decode_responses=True)
     pubsub = r.pubsub()
     channel = _channel_name(job_id)
     list_key = _list_name(job_id)
@@ -102,7 +100,7 @@ def subscribe(job_id: str) -> Generator[dict, None, None]:
         logger.debug(f"Cleaned up subscription for {job_id}")
 
 
-def _read_new_messages(r: redis.Redis, list_key: str, cursor: int) -> list[dict]:
+def _read_new_messages(r: redis_lib.Redis, list_key: str, cursor: int) -> list[dict]:
     """Read all messages from the list starting at the cursor position."""
     raw_messages = r.lrange(list_key, cursor, -1)
     results = []
