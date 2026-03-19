@@ -15,7 +15,6 @@ from datetime import datetime
 
 sys.path.insert(0, ".")
 
-from app.config import settings
 from app.db.session import get_session, engine, Base
 from app.models import Filing, Job
 from ingestion.edgar_client import fetch_latest_filing
@@ -52,7 +51,7 @@ def run(ticker: str, filing_type: str = "10-K"):
         return
     
     # --- Create database records ---
-    print(f"\n[2/3] Creating database records...")
+    print("\n[2/3] Creating database records...")
     with get_session() as session:
         filing = Filing(
             company=filing_data["company"],
@@ -78,7 +77,7 @@ def run(ticker: str, filing_type: str = "10-K"):
         print(f"      ✓ Filing ID: {filing_id}")
     
     # --- Run agent ---
-    print(f"\n[3/3] Running agent analysis...\n")
+    print("\n[3/3] Running agent analysis...\n")
     
     initial_state = {
         "filing_id": filing_id,
@@ -100,7 +99,7 @@ def run(ticker: str, filing_type: str = "10-K"):
     
     # --- Print results ---
     print(f"\n{'='*60}")
-    print(f"  RESULTS")
+    print("  RESULTS")
     print(f"{'='*60}\n")
     
     print("Agent Timeline:")
@@ -135,7 +134,7 @@ def run(ticker: str, filing_type: str = "10-K"):
     
     comparison = result.get("comparison")
     if comparison and comparison.get("summary"):
-        print(f"\nHistorical Comparison:")
+        print("\nHistorical Comparison:")
         print(f"  {comparison['summary']}")
     
     print(f"\n{'='*60}\n")

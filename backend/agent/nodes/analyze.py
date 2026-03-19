@@ -13,8 +13,6 @@ from pathlib import Path
 from agent.state import AgentState
 from agent.clients import get_openai_client
 from app.config import settings
-from app.db.session import get_session
-from app.models.filing_chunk import FilingChunk
 
 logger = logging.getLogger(__name__)
 

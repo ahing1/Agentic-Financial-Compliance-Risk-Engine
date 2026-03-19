@@ -16,7 +16,6 @@ On retry loops, chunks are already in pgvector — no need to re-embed.
 """
 
 import logging
-from uuid import uuid4
 
 from agent.state import AgentState
 from agent.clients import get_openai_client

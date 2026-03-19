@@ -14,10 +14,9 @@ immediately instead of failing at runtime deep in the agent pipeline.
 """
 
 import pytest
-from datetime import date, datetime
+from datetime import date
 from app.models.user import User
 from app.models.filing import Filing
-from app.models.filing_chunk import FilingChunk
 from app.models.report import AnalysisReport
 from app.models.risk_factor import RiskFactor
 from app.models.job import Job

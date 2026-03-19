@@ -1,6 +1,6 @@
 import os
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 # Override the database URL BEFORE importing app modules.

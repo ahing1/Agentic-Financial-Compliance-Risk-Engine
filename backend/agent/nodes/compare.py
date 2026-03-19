@@ -7,8 +7,6 @@ import json
 import logging
 from pathlib import Path
 
-from sqlalchemy import select
-
 from agent.state import AgentState
 from agent.clients import get_openai_client
 from app.config import settings

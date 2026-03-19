@@ -1,19 +1,19 @@
+import os
 import faulthandler
 import sys
+from celery import Celery
+from app.config import settings
 
 _fault_log = open("/tmp/celery_crash.log", "a")
 faulthandler.enable(file=_fault_log)
 faulthandler.enable(file=sys.stderr)
 
-import os
 
 # Must be set BEFORE any other imports. On macOS, Celery's billiard library
 # forks the worker process. Fork + Objective-C runtime = crash ("Python quit
 # unexpectedly"). This env var disables the fork-safety check that kills the process.
 os.environ.setdefault("OBJC_DISABLE_INITIALIZE_FORK_SAFETY", "YES")
 
-from celery import Celery
-from app.config import settings
 
 REDIS_URL = settings.database_url.replace(
     "postgresql", "redis"

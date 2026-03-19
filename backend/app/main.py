@@ -44,7 +44,6 @@ def on_startup():
     for development — you don't need to run a separate migration
     command every time you restart the server.
     """
-    import app.models
     from sqlalchemy import text
     engine = get_engine()
     with engine.connect() as conn:

@@ -1,4 +1,3 @@
-import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -13,7 +12,6 @@ import app.models.filing_chunk
 import app.models.job
 import app.models.report
 import app.models.risk_factor
-import app.models.user
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

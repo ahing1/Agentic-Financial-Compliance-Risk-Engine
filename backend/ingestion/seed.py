@@ -20,7 +20,6 @@ from datetime import datetime
 
 sys.path.insert(0, ".")
 
-from app.config import settings
 from app.db.session import get_session, engine, Base
 from app.models import Filing, Job
 from ingestion.edgar_client import fetch_latest_filing
