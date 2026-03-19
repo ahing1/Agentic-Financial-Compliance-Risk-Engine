@@ -5,15 +5,10 @@ import type { ProgressUpdate } from "@/lib/types";
 type SSEStatus = "idle" | "connecting" | "open" | "closed" | "error";
 
 interface UseSSEReturn {
-  /** All progress messages received so far, in order */
   messages: ProgressUpdate[];
-  /** Current connection status */
   status: SSEStatus;
-  /** The most recent progress percentage (0-100) */
   progress: number;
-  /** Whether the job has finished (complete or error) */
   isFinished: boolean;
-  /** Manually close the connection */
   close: () => void;
 }
 
@@ -37,9 +32,7 @@ export function useSSE(jobId: string | null): UseSSEReturn {
   }, []);
 
   useEffect(() => {
-    // Don't connect if there's no job to stream
     if (!jobId) {
-      setStatus("idle");
       return;
     }
 
@@ -83,8 +76,6 @@ export function useSSE(jobId: string | null): UseSSEReturn {
       // EventSource fires onerror for both network errors AND
       // when the server closes the connection. Check readyState
       // to distinguish:
-      // - CONNECTING (0): EventSource is trying to reconnect (normal)
-      // - CLOSED (2): Connection was closed permanently (error or done)
       if (es.readyState === EventSource.CLOSED) {
         setStatus("closed");
         eventSourceRef.current = null;
@@ -99,8 +90,9 @@ export function useSSE(jobId: string | null): UseSSEReturn {
     return () => {
       es.close();
       eventSourceRef.current = null;
+      setStatus("idle");
     };
-  }, [jobId]); // Re-run when jobId changes
+  }, [jobId]);
 
   return { messages, status, progress, isFinished, close };
 }
