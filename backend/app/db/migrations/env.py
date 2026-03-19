@@ -7,11 +7,6 @@ from alembic import context
 
 from app.config import settings
 from app.db.session import Base
-import app.models.filing
-import app.models.filing_chunk
-import app.models.job
-import app.models.report
-import app.models.risk_factor
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
