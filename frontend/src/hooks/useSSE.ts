@@ -36,18 +36,16 @@ export function useSSE(jobId: string | null): UseSSEReturn {
       return;
     }
 
-    // Reset state for a new connection
-    setMessages([]);
-    setProgress(0);
-    setIsFinished(false);
-    setStatus("connecting");
-
     // Open the SSE connection
     const url = getStreamUrl(jobId);
     const es = new EventSource(url);
     eventSourceRef.current = es;
 
     es.onopen = () => {
+      // Reset state when connection opens
+      setMessages([]);
+      setProgress(0);
+      setIsFinished(false);
       setStatus("open");
     };
 
