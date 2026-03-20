@@ -80,3 +80,25 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           EDGAR_USER_AGENT: "CI TestRunner ci@test.com"
         run: cd backend && python -m pytest tests/ -v
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/compliance-engine
+            git pull origin main
+            docker compose up -d --build
+            sleep 15
+            curl -sf http://localhost:8000/health && echo "Deploy successful!" || echo "Health check failed!"
+
