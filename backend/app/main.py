@@ -1,9 +1,6 @@
 import logging, os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from slowapi import _rate_limit_exceeded_handler as default_handler
 from slowapi.errors import RateLimitExceeded
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
 
