@@ -1,7 +1,10 @@
-import logging, os
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
+
 from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
 
 from app.routes import filings, stream, health, auth
