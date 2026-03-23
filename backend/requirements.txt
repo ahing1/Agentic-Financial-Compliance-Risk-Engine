@@ -27,3 +27,8 @@ python-dotenv==1.2.2
 # --- Testing ---
 pytest==8.3.5
 pytest-asyncio==1.1.0
+
+# Auth
+python-jose[cryptography]
+bcrypt>=4.1
+slowapi

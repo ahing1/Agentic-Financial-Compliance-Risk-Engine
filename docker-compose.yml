@@ -40,6 +40,8 @@ services:
       EDGAR_USER_AGENT: ${EDGAR_USER_AGENT}
       LLM_MODEL: ${LLM_MODEL:-gpt-4o}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-secret-key}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,6 +61,8 @@ services:
       EDGAR_USER_AGENT: ${EDGAR_USER_AGENT}
       LLM_MODEL: ${LLM_MODEL:-gpt-4o}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-secret-key}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
     depends_on:
       postgres:
         condition: service_healthy

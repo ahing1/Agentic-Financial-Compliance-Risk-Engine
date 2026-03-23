@@ -30,4 +30,10 @@ class Settings:
     chunk_min_words: int = 200
     chunk_max_words: int = 1000
 
+    # auth
+    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY")
+    jwt_expiration_hours: int = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
+    jwt_algorithm: str = "HS256"
+
+
 settings = Settings()

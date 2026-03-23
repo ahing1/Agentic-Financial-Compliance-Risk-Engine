@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { submitFiling } from "@/lib/api";
 import { useSSE } from "@/hooks/useSSE";
+import { useAuth } from "@/hooks/useAuth";
+import AuthForm from "@/components/AuthForm";
 import FilingInput from "@/components/FilingInput";
 import AgentFeed from "@/components/AgentFeed";
 import ReportView from "@/components/ReportView";
@@ -10,14 +12,24 @@ import FilingHistory from "@/components/FilingHistory";
 import type { DashboardView } from "@/lib/types";
 
 export default function DashboardPage() {
-  const [view, setView] = useState<DashboardView>("idle");
+  // --- Auth ---
+  const {
+    isLoggedIn,
+    userEmail,
+    loginError,
+    registerError,
+    isLoading: authLoading,
+    login,
+    register,
+    logout,
+  } = useAuth();
 
+  // --- View state ---
+  const [view, setView] = useState<DashboardView>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [activeFilingId, setActiveFilingId] = useState<string | null>(null);
-
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const { messages, progress, isFinished } = useSSE(
@@ -30,7 +42,6 @@ export default function DashboardPage() {
 
     try {
       const result = await submitFiling(ticker, filingType);
-
       setActiveJobId(result.job_id);
       setActiveFilingId(result.filing_id);
       setView("processing");
@@ -43,19 +54,15 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // When the agent finishes, transition to report view
-  useEffect(() => {
-    if (view !== "processing" || !isFinished || !activeFilingId) return;
+  if (view === "processing" && isFinished && activeFilingId) {
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage?.step !== "complete") return;
-
-    const timer = setTimeout(() => {
-      setView("viewing_report");
-      setRefreshTrigger((prev) => prev + 1);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [view, isFinished, activeFilingId, messages]);
+    if (lastMessage?.step === "complete") {
+      setTimeout(() => {
+        setView("viewing_report");
+        setRefreshTrigger((prev) => prev + 1);
+      }, 1000);
+    }
+  }
 
   const handleSelectFiling = useCallback((filingId: string) => {
     setActiveFilingId(filingId);
@@ -69,9 +76,33 @@ export default function DashboardPage() {
     setActiveFilingId(null);
   }, []);
 
+  // --- Show login form if not authenticated ---
+  if (!isLoggedIn) {
+    return (
+      <AuthForm
+        onLogin={login}
+        onRegister={register}
+        loginError={loginError}
+        registerError={registerError}
+        isLoading={authLoading}
+      />
+    );
+  }
+
+  // --- Authenticated: show dashboard ---
   return (
     <div className="space-y-8">
-      {/* Filing input — always visible, disabled during processing */}
+      {/* User info bar */}
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <span>Logged in as {userEmail}</span>
+        <button
+          onClick={logout}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          Sign out
+        </button>
+      </div>
+
       <section>
         <FilingInput
           onSubmit={handleSubmit}
@@ -82,7 +113,6 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* Main content area — changes based on view state */}
       <section>
         {view === "processing" && (
           <AgentFeed
@@ -97,7 +127,6 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* Filing history — visible in idle and processing views */}
       {view !== "viewing_report" && (
         <section>
           <FilingHistory

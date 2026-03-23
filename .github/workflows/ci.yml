@@ -116,7 +116,7 @@ jobs:
         run: |
           cd frontend
           npm ci
-          NEXT_PUBLIC_API_URL=${{ secrets.API_URL }} npm run build
+          NEXT_OUTPUT=export NEXT_PUBLIC_API_URL=${{ secrets.API_URL }} npm run build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

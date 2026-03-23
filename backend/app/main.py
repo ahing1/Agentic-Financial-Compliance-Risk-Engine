@@ -1,10 +1,16 @@
-import logging
+import logging, os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import filings, stream, health
+from slowapi import _rate_limit_exceeded_handler as default_handler
+from slowapi.errors import RateLimitExceeded
+from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
+
+from app.routes import filings, stream, health, auth
 from app.db.session import get_engine, Base
+from app.logging_config import setup_logging
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,6 +23,12 @@ app = FastAPI(
     description="Agentic Financial Compliance & Risk Analysis Engine",
     version="0.1.0"
 )
+
+is_production = os.getenv("ENVIRONMENT", "development") == "production"
+setup_logging(json_format=is_production, level="INFO")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,6 +44,7 @@ app.add_middleware(
 app.include_router(filings.router)
 app.include_router(stream.router)
 app.include_router(health.router)
+app.include_router(auth.router)
 
 
 @app.on_event("startup")

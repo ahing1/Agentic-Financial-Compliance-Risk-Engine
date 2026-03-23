@@ -18,6 +18,7 @@ from fastapi.responses import StreamingResponse
 from app.db.session import get_session
 from app.models.job import Job
 from worker.pubsub import subscribe
+from app.services.auth_service import decode_token
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,14 @@ router = APIRouter(tags=["Streaming"])
 
 
 @router.get("/stream/{job_id}")
-def stream_job_progress(job_id: str):
+def stream_job_progress(job_id: str, token: str | None=None):
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Token required")
+    user_id = decode_token(token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
     # Verify the job exists before opening a long-lived connection
     with get_session() as session:
         job = session.query(Job).filter_by(id=job_id).first()

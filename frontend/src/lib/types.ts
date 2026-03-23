@@ -65,4 +65,27 @@ export interface HealthResponse {
   redis: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user_id: string;
+  email: string;
+}
+
+export interface RegisterResponse {
+  user_id: string;
+  email: string;
+  message: string;
+}
+
 export type DashboardView = "idle" | "processing" | "viewing_report";
