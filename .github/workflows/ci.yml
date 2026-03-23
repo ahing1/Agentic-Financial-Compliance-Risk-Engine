@@ -95,7 +95,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/compliance-engine
-            git pull origin main
+            git pull --rebase origin main
             docker compose up -d --build
             sleep 15
             curl -sf http://localhost:8000/health && echo "Deploy successful!" || echo "Health check failed!"
