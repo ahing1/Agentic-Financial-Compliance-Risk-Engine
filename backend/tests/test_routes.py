@@ -14,20 +14,34 @@ These tests verify:
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.middleware.auth import get_current_user
 
 
 @pytest.fixture
 def client():
     """
     Create a test client for the FastAPI app.
-    
+
     TestClient wraps the app and lets you make requests like:
         response = client.get("/health")
         response = client.post("/filings/analyze", json={...})
-    
+
     No real HTTP server is started — requests go directly to the app.
     """
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_client(client):
+    """
+    Test client with auth bypassed.
+
+    Overrides the get_current_user dependency so filing endpoints
+    can be tested without a real user/token in the database.
+    """
+    app.dependency_overrides[get_current_user] = lambda: "test-user-id"
+    yield client
+    app.dependency_overrides.clear()
 
 
 class TestHealthEndpoint:
@@ -56,44 +70,44 @@ class TestRootEndpoint:
 
 
 class TestFilingEndpoints:
-    
-    def test_analyze_rejects_empty_ticker(self, client):
+
+    def test_analyze_rejects_empty_ticker(self, auth_client):
         """POST /filings/analyze rejects empty ticker with 422."""
-        response = client.post(
+        response = auth_client.post(
             "/filings/analyze",
             json={"ticker": "", "filing_type": "10-K"},
         )
         assert response.status_code == 422
-    
-    def test_analyze_rejects_invalid_filing_type(self, client):
+
+    def test_analyze_rejects_invalid_filing_type(self, auth_client):
         """POST /filings/analyze rejects invalid filing type."""
-        response = client.post(
+        response = auth_client.post(
             "/filings/analyze",
             json={"ticker": "AAPL", "filing_type": "8-K"},
         )
         assert response.status_code == 422
-    
-    def test_analyze_rejects_numeric_ticker(self, client):
+
+    def test_analyze_rejects_numeric_ticker(self, auth_client):
         """POST /filings/analyze rejects tickers with numbers."""
-        response = client.post(
+        response = auth_client.post(
             "/filings/analyze",
             json={"ticker": "ABC123", "filing_type": "10-K"},
         )
         assert response.status_code == 422
-    
-    def test_status_returns_404_for_unknown_filing(self, client):
+
+    def test_status_returns_404_for_unknown_filing(self, auth_client):
         """GET /filings/{id}/status returns 404 for non-existent filing."""
-        response = client.get("/filings/00000000-0000-0000-0000-000000000000/status")
+        response = auth_client.get("/filings/00000000-0000-0000-0000-000000000000/status")
         assert response.status_code == 404
-    
-    def test_report_returns_404_for_unknown_filing(self, client):
+
+    def test_report_returns_404_for_unknown_filing(self, auth_client):
         """GET /filings/{id}/report returns 404 for non-existent filing."""
-        response = client.get("/filings/00000000-0000-0000-0000-000000000000/report")
+        response = auth_client.get("/filings/00000000-0000-0000-0000-000000000000/report")
         assert response.status_code == 404
-    
-    def test_history_returns_paginated_response(self, client):
+
+    def test_history_returns_paginated_response(self, auth_client):
         """GET /filings/history returns proper pagination structure."""
-        response = client.get("/filings/history")
+        response = auth_client.get("/filings/history")
         assert response.status_code == 200
         data = response.json()
         assert "filings" in data
@@ -101,21 +115,21 @@ class TestFilingEndpoints:
         assert "page" in data
         assert "page_size" in data
         assert isinstance(data["filings"], list)
-    
-    def test_history_accepts_pagination_params(self, client):
+
+    def test_history_accepts_pagination_params(self, auth_client):
         """GET /filings/history respects page and page_size params."""
-        response = client.get("/filings/history?page=1&page_size=5")
+        response = auth_client.get("/filings/history?page=1&page_size=5")
         assert response.status_code == 200
         data = response.json()
         assert data["page"] == 1
         assert data["page_size"] == 5
-    
-    def test_history_rejects_invalid_page(self, client):
+
+    def test_history_rejects_invalid_page(self, auth_client):
         """GET /filings/history rejects page < 1."""
-        response = client.get("/filings/history?page=0")
+        response = auth_client.get("/filings/history?page=0")
         assert response.status_code == 422
-    
-    def test_history_rejects_oversized_page(self, client):
+
+    def test_history_rejects_oversized_page(self, auth_client):
         """GET /filings/history rejects page_size > 100."""
-        response = client.get("/filings/history?page_size=500")
+        response = auth_client.get("/filings/history?page_size=500")
         assert response.status_code == 422
